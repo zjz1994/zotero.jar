@@ -5,6 +5,7 @@
 <link type="text/css" rel="stylesheet" href="css/note-ui.css"/>
 <script type="text/javascript" src="tinymce.min.js"></script>
 <script type="text/javascript" src="locale.js"></script>
+<script src="vconsole.min.js"></script>
 <script type="text/javascript">
 	tinymce.init({
 		body_id: "zotero-tinymce-note",
@@ -17,20 +18,20 @@
 		paste_retain_style_properties: 'all',
 		paste_data_images: true,
 		
-		plugins: "autolink,code,contextmenu,directionality,link,lists,nonbreaking,paste,searchreplace,textcolor,colorpicker,table,image,toc,codesample,hr,emoticons",
+		plugins: "autolink,code,directionality,link,lists,nonbreaking,paste,searchreplace,table,image,toc,codesample,hr,emoticons,charmap,wordcount,template",
 		
-		toolbar1: "bold italic underline strikethrough | subscript superscript | hr | forecolor backcolor | removeformat | emoticons toc blockquote link table image codesample | code",
-		toolbar2: "formatselect fontselect fontsizeselect | alignleft aligncenter alignright | bullist numlist outdent indent | %DIR% | searchreplace",
+		toolbar: ["bold italic underline strikethrough | subscript superscript | forecolor backcolor | removeformat | toc blockquote link | emoticons charmap hr table image codesample template | code",
+		"formatselect fontselect fontsizeselect | alignleft aligncenter alignright | bullist numlist outdent indent | %DIR% | searchreplace debug"],
 		
 		font_formats: 'Default=Times New Roman,SimSun;Andale Mono=andale mono,times;Arial=arial,helvetica,sans-serif;Arial Black=arial black,avant garde;Book Antiqua=book antiqua,palatino;Comic Sans MS=comic sans ms,sans-serif;Courier New=courier new,courier;Georgia=georgia,palatino;Helvetica=helvetica;Impact=impact,chicago;Symbol=symbol;Tahoma=tahoma,arial,helvetica,sans-serif;Terminal=terminal,monaco;Times New Roman=times new roman,times;Trebuchet MS=trebuchet ms,geneva;Verdana=verdana,geneva;Webdings=webdings;Wingdings=wingdings,zapf dingbats;微软雅黑=Microsoft YaHei;微软正黑体=Microsoft JhengHei;黑体=SimHei;宋体=SimSun;新宋体=NSimSun;仿宋=FangSong;楷体=KaiTi;隶书=LiSu;幼圆=YouYuan',
 		
 		fontsize_formats: '8pt 10pt 12pt 14pt 18pt 20pt 22pt 24pt 36pt 48pt 72pt',
 		toolbar_items_size: 'small',
-		menubar: false,
+		menubar: 'edit insert view format table tools',
 		resize: false,
 		statusbar: false,
 		
-		contextmenu: "cut copy paste | link | alignmentmenu | dir | code",
+		contextmenu: "cut copy paste | link | code",
 		link_context_toolbar: true,
 		link_assume_external_targets: true,
 		nonbreaking_force_tab: 4,
@@ -38,57 +39,22 @@
 		target_list: false,
 		
 		setup: function (editor) {
-			setLocale(editor);
-			
-			// Add alignment submenu to context menu
-			editor.addMenuItem(
-				'alignmentmenu',
-				{
-					icon: 'alignleft',
-					text: 'Alignment',
-					menu: [
-						{
-							icon: 'alignleft',
-							text: 'Align Left',
-							onclick: function () {
-								tinyMCE.execCommand('JustifyLeft');
-							},
-							context: 'insert'
-						},
-						{
-							icon: 'aligncenter',
-							text: 'Align Center',
-							onclick: function () {
-								tinyMCE.execCommand('JustifyCenter');
-							},
-							context: 'insert'
-						},
-						{
-							icon: 'alignright',
-							text: 'Align Right',
-							onclick: function () {
-								tinyMCE.execCommand('JustifyRight');
-							},
-							context: 'insert'
-						},
-						{
-							icon: 'alignjustify',
-							text: 'Justify',
-							onclick: function () {
-								tinyMCE.execCommand('JustifyFull');
-							},
-							context: 'insert'
-						}
-					]
+			editor.ui.registry.addButton('debug', {
+				icon: 'info',
+				text: 'debug',
+				onAction: function () {
+					vConsole = new VConsole();
 				}
-			);
+			});
+			setLocale(editor);
+
 			
 			// Add alignment split-button menu
 			//
 			// https://codepen.io/alangill/pen/oLJAOd
 			//
 			// Not currently used, but useful if we need more toolbar space
-			/*editor.addButton(
+			/*editor.ui.registry.addButton(
 				'alignmentsplit', {
 					type: 'splitbutton',
 					text: '',
@@ -145,7 +111,7 @@
 			var dir = window.location.href.match(/dir=(ltr|rtl)/)[1];
 			var opDir = dir.split("").reverse().join("");
 			editor.settings.directionality = dir;
-			editor.addMenuItem('dir', {
+			editor.ui.registry.addMenuItem('dir', {
 				icon: opDir,
 				// TODO: Show correct label based on current line
 				text: opDir == 'rtl' ? "Right to left" : "Left to right",
